@@ -1,16 +1,33 @@
-# This is a sample Python script.
+import os
+import socket
+import threading
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+BIND = '0.0.0.0'
+PORT = int(os.environ.get('PORT'))
 
 
-# Press the green button in the gutter to run the script.
+def handler(client: socket.socket):
+    while True:
+        req = client.recv(1024)
+        print(f'[R] {req}')
+        client.send(bytes('Accepted\n', 'utf-8'))
+
+
+def loop(server: socket.socket):
+    client, addr = server.accept()
+    print(f'New connection accepted @ {addr[0]}:{addr[1]}')
+    thread = threading.Thread(target=handler, args=(client,))
+    thread.start()
+
+
+def main():
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((BIND, PORT))
+    server.listen(5)
+    print(f'Started server @ {BIND}:{PORT}')
+    while True:
+        loop(server)
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    main()
