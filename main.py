@@ -1,3 +1,4 @@
+import json
 import os
 import socket
 import threading
@@ -9,8 +10,9 @@ PORT = int(os.environ.get('PORT'))
 def handler(client: socket.socket):
     while True:
         req = client.recv(1024)
-        print(f'[R] {req}')
-        client.send(bytes('Accepted\n', 'utf-8'))
+        obj = json.loads(req)
+        print(f'[R] {obj}')
+        client.send(bytes('OK', 'utf-8'))
 
 
 def loop(server: socket.socket):
