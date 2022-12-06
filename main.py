@@ -14,12 +14,28 @@ def message(obj):
     return bytes(json.dumps(obj), 'utf-8')
 
 
+def controller(obj):
+    if 'beep' not in obj:
+        return {'ok': True}
+
+    cid = obj['id']
+    if cid not in pool:
+        return {'ok': False, 'message': 'Device not found'}
+
+    pool[cid]['client'].send(message({'beep': True}))
+    return {'ok': True}
+
+
 def handler(client: socket.socket):
     pid = None
     while True:
         req = client.recv(1024)
         obj = json.loads(req)
         print(f'[R] {obj}')
+
+        if 'ctl' in obj:
+            client.send(message(controller(obj)))
+            continue
 
         cid = obj['id']
         if cid < 0 or cid > 3:
